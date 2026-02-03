@@ -104,7 +104,7 @@ __global__ void bilagrid_sample_backward_kernel(
     }
 
     // spatial derivatives for coords
-    // ∂w000/∂x = -(1-fy)*(1-fz), ∂w001/∂x = +(1-fy)*(1-fz), etc...
+    // dw000/dx = -(1-fy)*(1-fz), dw001/dx = +(1-fy)*(1-fz), etc...
 #ifdef COMPUTE_COORDS_GRAD
     float dwdx[8] = {
         -(1-fy)*(1-fz),  (1-fy)*(1-fz),

@@ -205,8 +205,8 @@ void bilagrid_patched_sample_backward_v2(
     //     (h +block.y-1)/block.y,
     //     (N*m +block.z-1)/block.z
     // };
-    uint block = 256;
-    uint bounds = (w*h*N*m +block-1)/block;
+    unsigned block = 256;
+    unsigned bounds = (w*h*N*m +block-1)/block;
     bilagrid_patched_sample_backward_v2_kernel<<<bounds, block, 0, stream>>>(
         bilagrid, rgb, v_output,
         v_bilagrid, v_rgb,
