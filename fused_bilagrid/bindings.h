@@ -109,7 +109,7 @@ void tv_loss_forward(
 
 void tv_loss_backward(
     const float* bilagrid,
-    const float v_tv_loss,
+    const float* v_tv_loss,
     float* v_bilagrid,
     int N, int L, int H, int W,
     cudaStream_t stream
@@ -348,7 +348,7 @@ torch::Tensor tv_loss_backward_tensor(
 
     tv_loss_backward(
         bilagrid.data_ptr<float>(),
-        v_tv_loss.item<float>(),
+        v_tv_loss.data_ptr<float>(),
         v_bilagrid.data_ptr<float>(),
         N, L, H, W,
         at::cuda::getCurrentCUDAStream()

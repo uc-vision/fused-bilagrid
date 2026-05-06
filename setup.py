@@ -65,6 +65,7 @@ class CustomBuildExtension(BuildExtension):
 
 setup(
     name="fused_bilagrid",
+    version="0.0.1",
     packages=['fused_bilagrid'],
     ext_modules=[
         CUDAExtension(

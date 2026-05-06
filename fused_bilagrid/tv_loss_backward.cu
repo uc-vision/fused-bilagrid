@@ -2,7 +2,7 @@
 
 __global__ void tv_loss_backward_kernel(
     const float* __restrict__ bilagrid,   // [N,12,L,H,W]
-    const float v_tv_loss,                   // scalar gradient dL/d(tv_loss)
+    const float* __restrict__ v_tv_loss,  // scalar gradient dL/d(tv_loss), device ptr
     float* __restrict__ v_bilagrid,     // [N,12,L,H,W]
     int N, int L, int H, int W
 ) {
@@ -14,7 +14,7 @@ __global__ void tv_loss_backward_kernel(
     int li = idx % L; idx /= L;
     int ni = idx;
 
-    float s = v_tv_loss / (6*N);
+    float s = v_tv_loss[0] / (6*N);
     float sx = s / (float)(L * H * (W - 1));
     float sy = s / (float)(L * (H - 1) * W);
     float sz = s / (float)((L - 1) * H * W);
@@ -58,7 +58,7 @@ __global__ void tv_loss_backward_kernel(
 
 void tv_loss_backward(
     const float* bilagrid,
-    const float v_tv_loss,
+    const float* v_tv_loss,
     float* v_bilagrid,
     int N, int L, int H, int W,
     cudaStream_t stream
