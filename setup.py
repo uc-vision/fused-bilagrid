@@ -31,23 +31,38 @@ nvcc_args += ["-lineinfo", "--generate-line-info", "--source-in-ptx"]
 detected_arch = None
 
 if torch.cuda.is_available():
-    try:
-        device = torch.cuda.current_device()
-        compute_capability = torch.cuda.get_device_capability(device)
-        arch = f"sm_{compute_capability[0]}{compute_capability[1]}"
-        
-        # Print to multiple outputs
-        arch_msg = f"Detected GPU architecture: {arch}"
-        print(arch_msg)
-        print(arch_msg, file=sys.stderr, flush=True)
-        
-        nvcc_args.append(f"-arch={arch}")
-        detected_arch = arch
-    except Exception as e:
-        error_msg = f"Failed to detect GPU architecture: {e}. Falling back to multiple architectures."
-        print(error_msg)
-        print(error_msg, file=sys.stderr, flush=True)
-        nvcc_args.extend(fallback_archs)
+    cuda_archs_env = os.environ.get('CUDA_ARCHITECTURES')
+    arch_configured = False
+
+    if cuda_archs_env:
+        try:
+            archs = [arch.strip() for arch in cuda_archs_env.split(';')]
+            print(f"Using CUDA architectures from environment: {archs}")
+            for arch in archs:
+                nvcc_args.append(f"-gencode=arch=compute_{arch},code=sm_{arch}")
+            detected_arch = f"env:{','.join(archs)}"
+            arch_configured = True
+        except Exception as e:
+            print(f"Failed to parse CUDA_ARCHITECTURES environment variable: {e}. Trying device detection...")
+
+    if not arch_configured:
+        try:
+            device = torch.cuda.current_device()
+            compute_capability = torch.cuda.get_device_capability(device)
+            arch = f"sm_{compute_capability[0]}{compute_capability[1]}"
+            
+            # Print to multiple outputs
+            arch_msg = f"Detected GPU architecture: {arch}"
+            print(arch_msg)
+            print(arch_msg, file=sys.stderr, flush=True)
+            
+            nvcc_args.append(f"-arch={arch}")
+            detected_arch = arch
+        except Exception as e:
+            error_msg = f"Failed to detect GPU architecture: {e}. Falling back to multiple architectures."
+            print(error_msg)
+            print(error_msg, file=sys.stderr, flush=True)
+            nvcc_args.extend(fallback_archs)
 else:
     cuda_msg = "CUDA not available. Falling back to multiple architectures."
     print(cuda_msg)
